@@ -39,7 +39,7 @@ def is_new_image(existing_hashes, image_path):
 
 
 def handle_new_image(user, image_path, job_id):
-    if image_path.lower().endswith('.jpg'):
+    if image_path.lower().endswith('.jpg') or image_path.lower().endswith('.png'):
         try:
             elapsed_times = {
                 'md5':None,
@@ -194,7 +194,7 @@ def scan_photos(user):
 
         image_paths = [
             p for p in image_paths
-            if p.lower().endswith('.jpg') and 'thumb' not in p.lower()
+            if (p.lower().endswith('.jpg') or p.lower().endswith('.png')) and 'thumb' not in p.lower()
         ]
         image_paths.sort()
 
