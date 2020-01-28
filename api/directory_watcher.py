@@ -25,6 +25,7 @@ import rq
 from django.db.models import Q
 import json
 
+from PIL import Image
 
 def is_new_image(existing_hashes, image_path):
     hash_md5 = hashlib.md5()
@@ -39,7 +40,7 @@ def is_new_image(existing_hashes, image_path):
 
 
 def handle_new_image(user, image_path, job_id):
-    if image_path.lower().endswith('.jpg') or image_path.lower().endswith('.png'):
+    if image_path.lower().endswith('.jpg'):
         try:
             elapsed_times = {
                 'md5':None,
@@ -178,23 +179,43 @@ def scan_photos(user):
             job_type=LongRunningJob.JOB_SCAN_PHOTOS)
         lrj.save()
 
-
-
-
     added_photo_count = 0
     already_existing_photo = 0
+
+    util.logger.info("hida")
+    print("aaa")
 
     try:
         image_paths = []
 
         image_paths.extend([
-            os.path.join(dp, f) for dp, dn, fn in os.walk(user.scan_directory)
+            os.path.join(dp, f) for dp, dn, fn in os.walk(d)
             for f in fn
         ])
 
+        # png to jpg
+        file_list = []
+        for dp, dn, fn in os.walk(d):
+            scan_directory = dp
+            file_list = fn
+
+        png_list = []
+        for file in file_list:
+            if file.lower().endswith('.png'):
+                png_list.append(file)
+
+        util.logger.info("png list : " + str(pnt_list))
+
+        for png_file in png_list:
+            im = Image.open(os.path.join(scan_directory, png_file))
+            rgb_im = im.convert('RGB')
+            file_name = png_file.split('.')[0]
+            rgb_im.save(os.path.join(scan_directory, file_name+".jpg"))
+
+
         image_paths = [
             p for p in image_paths
-            if (p.lower().endswith('.jpg') or p.lower().endswith('.png')) and 'thumb' not in p.lower()
+            if p.lower().endswith('.jpg') and 'thumb' not in p.lower()
         ]
         image_paths.sort()
 
@@ -244,4 +265,6 @@ def scan_photos(user):
         next_result['new_photo_count'] = 0
         lrj.result = next_result
         lrj.save()
+
+
     return {"new_photo_count": added_photo_count, "status": True}
