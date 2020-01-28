@@ -164,6 +164,7 @@ def handle_new_image(user, image_path, job_id):
 
 @job
 def scan_photos(user):
+
     job_id = rq.get_current_job().id
 
     if LongRunningJob.objects.filter(job_id=job_id).exists():
@@ -182,20 +183,17 @@ def scan_photos(user):
     added_photo_count = 0
     already_existing_photo = 0
 
-    util.logger.info("hida")
-    print("aaa")
-
     try:
         image_paths = []
 
         image_paths.extend([
-            os.path.join(dp, f) for dp, dn, fn in os.walk(d)
+            os.path.join(dp, f) for dp, dn, fn in os.walk(user.scan_directory)
             for f in fn
         ])
 
         # png to jpg
         file_list = []
-        for dp, dn, fn in os.walk(d):
+        for dp, dn, fn in os.walk(user.scan_directory):
             scan_directory = dp
             file_list = fn
 
@@ -204,7 +202,8 @@ def scan_photos(user):
             if file.lower().endswith('.png'):
                 png_list.append(file)
 
-        util.logger.info("png list : " + str(pnt_list))
+        with open('/tmp/tmp.txt', 'w') as f:
+            f.write(str(png_list))
 
         for png_file in png_list:
             im = Image.open(os.path.join(scan_directory, png_file))
