@@ -36,9 +36,10 @@ services:
       - "backend:backend"
 
   backend:
-    image: hooram/ownphotos:dev
+    image: alkyne/ownphotos:png
     # For development uncomment this and comment the image name above
     #build: .
+    #dockerfile: Dockerfile
     container_name: ownphotos-backend
     volumes:
       # Your photos go here
