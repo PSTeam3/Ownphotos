@@ -202,15 +202,38 @@ def scan_photos(user):
             if file.lower().endswith('.png'):
                 png_list.append(file)
 
-        with open('/tmp/tmp.txt', 'w') as f:
-            f.write(str(png_list))
-
         for png_file in png_list:
             im = Image.open(os.path.join(scan_directory, png_file))
             rgb_im = im.convert('RGB')
             file_name = png_file.split('.')[0]
             rgb_im.save(os.path.join(scan_directory, file_name+".jpg"))
 
+
+        # heic to jpg
+        heic_list = []
+        for file in file_list:
+            if file.lower().endswith('.heic'):
+                png_list.append(file)
+
+        with open('/tmp/heic_list', 'w') as f:
+            f.write(heic_list)
+
+        import whatimage
+        import pyheif
+        from PIL import Image
+        import io
+
+        for heic_file in heic_list:
+            file_name = heic_file.split('.')[0]
+            i = pyheif.read_heif(heic_file)
+
+            # Extract metadata etc
+            for metadata in i.metadata or []:
+                if metadata['type']=='Exif':
+                    print ('ok')
+                    s = io.BytesIO()
+                    pi = Image.frombytes(mode=i.mode, size=i.size, data=i.data)
+                    pi.save(os.path.join(scan_directory, file_name+'.jpg'), format="jpeg")
 
         image_paths = [
             p for p in image_paths
